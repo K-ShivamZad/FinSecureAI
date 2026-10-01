@@ -1,35 +1,49 @@
-# 🛡️ FinSecure AI: Intelligent Financial & Fraud Analytics
+# 🛡️ FinSecure AI: Hybrid Financial Analytics & Fraud Detection
 
-FinSecure AI is an enterprise-grade financial tracking and analytics platform. It is being developed using a **Phased Development Model**, evolving from a secure ETL pipeline and database management system into a fully autonomous, AI-driven fraud detection platform.
-
----
-
-## 🚀 Development Roadmap
-
-### Phase 1: Foundation (Minor Project) — *ACTIVE*
-Focuses on Data Engineering, Database Management, and Data Privacy.
-* **Secure Access Terminal:** Multi-user authentication system utilizing SHA-256 password hashing with unique salts (Data Privacy & Security).
-* **Data Engineering (ETL):** Automated pipeline to Extract raw bank logs (CSV), Transform messy records, and Load them directly into a relational database.
-* **DBMS Architecture:** Optimized SQLite schema with Primary/Foreign keys and index structures (`idx_user`) for rapid data retrieval.
-* **Real-Time Analytics Dashboard:** Responsive Streamlit interface featuring interactive Plotly visualizations and real-time Key Performance Indicators (KPIs).
-* **Data Masking:** Dynamic masking of sensitive transaction descriptions on the frontend to prevent data leaks.
-
-### Phase 2: Intelligence & Optimization (Capstone Upgrade) — *PLANNED*
-Focuses on Machine Learning, Advanced Algorithms, and Information Retrieval.
-* **Machine Learning Fraud Detection:** Integration of Random Forest / Isolation Forest models to autonomously flag suspicious transactions based on spending anomalies.
-* **Data Structures & Algorithms (DSA):** 
-  * Implementation of a **Trie Data Structure** for lightning-fast, auto-complete search functionality.
-  * Custom **Binary Search** implementation for highly optimized date-range filtering, bypassing standard linear scans.
-* **Information Retrieval (IR):** NLP-powered search engine allowing users to query the database using natural language (e.g., *"Show me high-risk transactions from last week"*).
+FinSecure AI is an enterprise-grade financial tracking and analytics platform. It uses a **Phased Development Model**, evolving from a secure ETL pipeline and NLP-based logging system (Minor Project) into a fully decoupled, AI-driven fraud detection platform (Capstone Project).
 
 ---
 
-## 🛠️ Technology Stack
+## 🚀 Phase 1: Foundation (Minor Project) — *COMPLETED*
+This phase focuses on Data Engineering, Information Retrieval (NLP), Database Management, and Data Privacy.
+
+### 🌟 Core Features Implemented:
+* **Hybrid Data Input Hub:**
+  * **🎙️ Smart NLP Logger:** Integrated `spaCy` for Natural Language Processing. Users can type conversational expenses (e.g., *"Paid 1200 for flight ticket"*), and the system autonomously extracts the amount and categorizes it using keyword lemmatization.
+  * **📤 Secure Bulk ETL Pipeline:** Automated Extract-Transform-Load pipeline with strict CSV schema validation. Prevents database corruption and handles server errors gracefully.
+* **Security & DBMS:** 
+  * Multi-user authentication using **SHA-256 password hashing** with unique salts.
+  * Optimized SQLite architecture with Primary/Foreign keys.
+  * Frontend **Data Masking** to hide sensitive transaction descriptions (Data Privacy).
+* **Interactive Analytics & Budgeting:**
+  * Real-time KPIs and dynamic Plotly visualizations.
+  * **Budget Tracker:** Users can set monthly goals, triggering dynamic progress bars and visual alerts.
+  * **Data Export:** 1-Click "Download Audit Report" functionality for localized CSV backups.
+* **Data Science Preparation (Heuristic Labeling):** Built-in rule-based flagging (transactions > ₹50,000) to autonomously generate labeled training data for Phase 2 Machine Learning models.
+
+---
+
+## 🛠️ Technology Stack (Phase 1)
 * **Frontend:** Streamlit, Custom CSS
-* **Data Visualization:** Plotly Express
-* **Data Processing:** Pandas (ETL Pipeline)
+* **Data Processing & Analytics:** Pandas, Plotly Express
+* **Information Retrieval (NLP):** spaCy (`en_core_web_sm`), Regex
 * **Database & Security:** SQLite3, Hashlib, Secrets
-* **Machine Learning:** Scikit-Learn *(Phase 2)*
+
+---
+
+## 🚀 Phase 2: Capstone Upgrade — *PLANNED*
+The next evolution involves transitioning from a monolithic prototype to a highly scalable microservices architecture.
+
+* **Architecture Overhaul:** Decoupling the system by migrating the backend to **FastAPI** and replacing Streamlit with a Custom JS/HTML frontend.
+* **Database Migration:** Upgrading from SQLite to **MySQL** for enterprise-level concurrency and relational integrity.
+* **Machine Learning:** Deploying Supervised (Random Forest) or Unsupervised (Isolation Forest) algorithms on the heuristically labeled dataset to detect spending anomalies autonomously.
+
+---
+
+## 🌿 Git Branching Strategy
+This repository strictly follows branch-based version control to separate academic evaluation phases:
+* **`main` branch (Stable):** Contains the fully tested, deployable Phase 1 (Minor Project) codebase.
+* **`capstone-upgrade` branch (Development):** The active workspace for Phase 2 architectural migrations and ML deployments.
 
 ---
 
