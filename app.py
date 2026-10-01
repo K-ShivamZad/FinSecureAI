@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from db_handler import init_db, create_user, verify_user, load_csv_to_db, get_data
+from db_handler import init_db, create_user, verify_user, load_csv_to_db, get_data, set_budget, get_budget
 
 # page_icon aur layout wide set karne se UI better scale hota hai
 st.set_page_config(page_title="FinSecure AI", page_icon="🛡️", layout="wide", initial_sidebar_state="collapsed")
@@ -53,9 +53,53 @@ if not st.session_state.user:
                     st.success("Created! Please Login.")
                 else: 
                     st.error("Username exists.")
+
 else:
-    # MAIN DASHBOARD
+    # MAIN DASHBOARD & SIDEBAR
     st.sidebar.title(f"👤 Admin: {st.session_state.user}")
+    
+    df = get_data(st.session_state.user)
+    
+    # 1. Practical Feature: Dynamic Date Filtering
+    if not df.empty:
+        st.sidebar.markdown("---")
+        st.sidebar.subheader("📅 Filter Analytics")
+        
+        # Convert date column to datetime objects safely
+        df['date'] = pd.to_datetime(df['date'], errors='coerce')
+        min_date, max_date = df['date'].min().date(), df['date'].max().date()
+        
+        # Date range picker
+        date_range = st.sidebar.date_input("Select Date Range", [min_date, max_date], min_value=min_date, max_value=max_date)
+        
+        # Apply filter if both dates are selected
+        if len(date_range) == 2:
+            start_date, end_date = date_range
+            mask = (df['date'].dt.date >= start_date) & (df['date'].dt.date <= end_date)
+            df = df.loc[mask]
+
+    # 2. Budget Tracker Widget
+    st.sidebar.markdown("---")
+    st.sidebar.subheader("🎯 Budget Settings")
+    current_budget = get_budget(st.session_state.user)
+    new_budget = st.sidebar.number_input("Set Monthly Budget (₹)", min_value=0, value=int(current_budget), step=1000)
+    
+    if st.sidebar.button("Update Budget"):
+        set_budget(st.session_state.user, new_budget)
+        st.sidebar.success("Budget Saved!")
+        st.rerun()
+        
+    # 3. Practical Feature: 1-Click Audit Export
+    if not df.empty:
+        st.sidebar.markdown("---")
+        csv_export = df.to_csv(index=False).encode('utf-8')
+        st.sidebar.download_button(
+            label="📥 Download Audit Report (CSV)",
+            data=csv_export,
+            file_name=f"FinSecure_Audit_{st.session_state.user}.csv",
+            mime="text/csv",
+        )
+
     st.sidebar.markdown("---")
     if st.sidebar.button("Logout", type="secondary"):
         st.session_state.user = None
@@ -63,49 +107,71 @@ else:
 
     st.title("📊 FinSecure AI Analytics")
     
-    df = get_data(st.session_state.user)
-    
-    # 1. KPI Metrics (Highly responsive, auto-resizes on mobile)
+    # KPI Metrics
     if not df.empty:
+        total_spent = df['amount'].sum()
+        
         kpi1, kpi2, kpi3 = st.columns(3)
         with kpi1:
             st.metric("Total Transactions", len(df))
         with kpi2:
-            st.metric("Total Volume (₹)", f"{df['amount'].sum():,.2f}")
+            st.metric("Total Volume (₹)", f"{total_spent:,.2f}")
         with kpi3:
-            st.metric("Risk Level", "Low (Phase 1)", delta="Normal", delta_color="normal")
+            suspicious_count = len(df[df['is_fraud'] == 1])
+            if suspicious_count > 0:
+                st.metric("Risk Level", "Elevated", delta=f"{suspicious_count} Alerts", delta_color="inverse")
+            else:
+                st.metric("Risk Level", "Low (Phase 1)", delta="Normal", delta_color="normal")
+        
+        if current_budget > 0:
+            st.write("### 📈 Budget Utilization")
+            progress_fraction = min(total_spent / current_budget, 1.0)
+            st.progress(progress_fraction)
+            
+            if total_spent > current_budget:
+                st.error(f"⚠️ Budget Exceeded! You have spent ₹{total_spent:,.2f} out of your ₹{current_budget:,.2f} budget.")
+            else:
+                st.success(f"✅ On Track! You have spent ₹{total_spent:,.2f} out of your ₹{current_budget:,.2f} budget.")
         st.divider()
 
-    # 2. Responsive Layout for Data & Upload
-    # Desktop par 2:1 ratio me dikhega, mobile par automatically ek ke niche ek aayega
+    # Responsive Layout for Data & Upload
     left_col, right_col = st.columns([2, 1], gap="large")
     
     with right_col:
         st.subheader("⚙️ Data Engineering")
-        # Expander use kiya hai taaki mobile screens par UI clutter na ho
         with st.expander("📤 Upload New Bank Logs (CSV)", expanded=True):
             st.info("Columns required: date, amount, category, description")
             file = st.file_uploader("Drop CSV here", type=['csv'], label_visibility="collapsed")
             
             if file and st.button("Run ETL Pipeline", type="primary"):
-                with st.spinner("Processing & Securing Data..."):
+                with st.spinner("Validating & Securing Data..."):
                     df_upload = pd.read_csv(file)
-                    load_csv_to_db(st.session_state.user, df_upload)
-                    st.success("ETL Successful!")
-                    st.rerun() # Refresh page to show new data immediately
+                    
+                    # Connected to the new Error Handling function
+                    success, message = load_csv_to_db(st.session_state.user, df_upload)
+                    if success:
+                        st.success(message)
+                        st.rerun()
+                    else:
+                        st.error(message) # Shows exact validation error without crashing
     
     with left_col:
         st.subheader("🔍 Transaction Intelligence")
         if not df.empty:
-            # Plotly chart native responsive hota hai
             fig = px.pie(df, values='amount', names='category', hole=0.4)
             fig.update_layout(margin=dict(t=0, b=0, l=0, r=0), height=300)
-            st.plotly_chart(fig, use_container_width=True) # use_container_width zaruri hai screen fit ke liye
+            st.plotly_chart(fig, use_container_width=True) 
             
             st.write("### 📜 Secure Audit Logs")
             df['masked_desc'] = df['description'].apply(lambda x: str(x)[:4] + "****" if pd.notnull(x) else "")
             
-            # hide_index=True se table clean dikhti hai
-            st.dataframe(df[['date', 'category', 'amount', 'masked_desc']].tail(5), use_container_width=True, hide_index=True)
+            # Formats date for cleaner viewing
+            df['display_date'] = df['date'].dt.strftime('%Y-%m-%d')
+            st.dataframe(df[['display_date', 'category', 'amount', 'masked_desc']].tail(5), use_container_width=True, hide_index=True)
+            
+            suspicious_df = df[df['is_fraud'] == 1]
+            if not suspicious_df.empty:
+                st.error(f"⚠️ {len(suspicious_df)} Suspicious Transactions Detected (Requires Audit)")
+                st.dataframe(suspicious_df[['display_date', 'category', 'amount', 'description']], use_container_width=True, hide_index=True)
         else:
             st.info("Dashboard is empty. Run the ETL pipeline on the right to inject data.")

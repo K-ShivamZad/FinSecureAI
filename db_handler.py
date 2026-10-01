@@ -21,6 +21,11 @@ def init_db():
     c.execute('''CREATE TABLE IF NOT EXISTS transactions 
                  (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT, 
                   date TEXT, amount REAL, category TEXT, description TEXT, is_fraud INTEGER DEFAULT 0)''')
+    
+    # NEW: Table to store user budget goals (Integrates Slide 6 of your presentation)
+    c.execute('''CREATE TABLE IF NOT EXISTS user_settings 
+                 (username TEXT PRIMARY KEY, monthly_budget REAL)''')
+                 
     c.execute('CREATE INDEX IF NOT EXISTS idx_user ON transactions(username)')
     conn.commit()
     conn.close()
@@ -50,15 +55,35 @@ def verify_user(username, password):
 
 # 3. Data Engineering (ETL Process)
 def load_csv_to_db(username, df):
-    conn = sqlite3.connect(DB_NAME)
-    df['username'] = username
-    df['is_fraud'] = 0 # Default normal for Phase 1
-    # Extracts data from CSV and Loads directly to SQL
-    df[['username', 'date', 'amount', 'category', 'description', 'is_fraud']].to_sql('transactions', conn, if_exists='append', index=False)
-    conn.close()
-
-def get_data(username):
-    conn = sqlite3.connect(DB_NAME)
-    df = pd.read_sql("SELECT * FROM transactions WHERE username = ?", conn, params=(username,))
-    conn.close()
-    return df
+    """
+    ETL Pipeline with Data Validation and Error Handling.
+    Checks for structural integrity before executing SQL loads.
+    """
+    # 1. Testing & Validation: Check if correct columns exist
+    required_columns = {'date', 'amount', 'category', 'description'}
+    if not required_columns.issubset(set(df.columns)):
+        return False, f"Invalid CSV structure. Required columns: {required_columns}"
+    
+    try:
+        conn = sqlite3.connect(DB_NAME)
+        df['username'] = username
+        
+        # Data Science Heuristic Labeling
+        df['is_fraud'] = pd.to_numeric(df['amount'], errors='coerce').fillna(0)
+        df['is_fraud'] = df['is_fraud'].apply(lambda x: 1 if float(x) > 50000 else 0)
+        
+        # Load safely to SQL
+        df[['username', 'date', 'amount', 'category', 'description', 'is_fraud']].to_sql(
+            'transactions', conn, if_exists='append', index=False
+        )
+        conn.commit()
+        return True, "Data securely loaded into Database!"
+    
+    except Exception as e:
+        # Code Optimization: Catching server/DB errors gracefully
+        return False, f"Database Error: {str(e)}"
+    
+    finally:
+        # Architecture Planning: Always close connections to prevent memory leaks
+        if conn:
+            conn.close()
