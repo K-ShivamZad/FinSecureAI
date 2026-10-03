@@ -6,10 +6,13 @@ venv/
 ENV/
 finsecure/
 
-# Database & Sensitive Data (Data Privacy)
+# Database & Sensitive Data
 *.db
 *.sqlite3
 finsecure.db
+
+# NiceGUI
+.nicegui/
 
 # Python Caches & Compiled Files
 __pycache__/
@@ -17,14 +20,11 @@ __pycache__/
 *$py.class
 *.so
 
-# Streamlit specific
-.streamlit/
-
 # IDE / VS Code
 .vscode/
 .idea/
 
-# OS generated files (Windows/Mac)
+# OS generated files
 Thumbs.db
 ehthumbs.db
 .DS_Store

@@ -1,55 +1,96 @@
 # 🛡️ FinSecure AI: Hybrid Financial Analytics & Fraud Detection
 
-FinSecure AI is an enterprise-grade financial tracking and analytics platform. It uses a **Phased Development Model**, evolving from a secure ETL pipeline and NLP-based logging system (Minor Project) into a fully decoupled, AI-driven fraud detection platform (Capstone Project).
+FinSecure AI is an enterprise-grade financial data parsing, intelligence, and profiling engine. Designed around a **Phased Academic Development Model**, the platform transitions data architectures across two evaluation milestones: tracking infrastructure and interactive profiling (Phase 1) into automated schema realization, session-bound context vector math, and isolated analytical sandboxes (Phase 2).
 
 ---
 
-## 🚀 Phase 1: Foundation (Minor Project) — *COMPLETED*
-This phase focuses on Data Engineering, Information Retrieval (NLP), Database Management, and Data Privacy.
+## 🏗️ High-Level System Architecture & Design
 
-### 🌟 Core Features Implemented:
-* **Hybrid Data Input Hub:**
-  * **🎙️ Smart NLP Logger:** Integrated `spaCy` for Natural Language Processing. Users can type conversational expenses (e.g., *"Paid 1200 for flight ticket"*), and the system autonomously extracts the amount and categorizes it using keyword lemmatization.
-  * **📤 Secure Bulk ETL Pipeline:** Automated Extract-Transform-Load pipeline with strict CSV schema validation. Prevents database corruption and handles server errors gracefully.
-* **Security & DBMS:** 
-  * Multi-user authentication using **SHA-256 password hashing** with unique salts.
-  * Optimized SQLite architecture with Primary/Foreign keys.
-  * Frontend **Data Masking** to hide sensitive transaction descriptions (Data Privacy).
-* **Interactive Analytics & Budgeting:**
-  * Real-time KPIs and dynamic Plotly visualizations.
-  * **Budget Tracker:** Users can set monthly goals, triggering dynamic progress bars and visual alerts.
-  * **Data Export:** 1-Click "Download Audit Report" functionality for localized CSV backups.
-* **Data Science Preparation (Heuristic Labeling):** Built-in rule-based flagging (transactions > ₹50,000) to autonomously generate labeled training data for Phase 2 Machine Learning models.
+The ecosystem utilizes an asynchronous, non-blocking **Model-View-Controller (MVC)** framework driven by **NiceGUI** on the frontend, mapped directly to an optimized **SQLite database micro-core executing in Write-Ahead Logging (WAL) mode** for high concurrency and zero transactional deadlocks.
+
+```mermaid
+graph TD
+    %% Presentation Tier
+    subgraph UI [Client Interface Tier]
+        Nice[NiceGUI Web UI Engine]
+        Theme[Dynamic Theme Sync: Light/Dark]
+    end
+
+    %% Logic Tier
+    subgraph Core [Application Logic Layer]
+        Auth[Cryptographic Session Auth]
+        ETL[Universal Ingestion Pipeline & ARFF Stream Parser]
+        Profile[Statistical Distribution Profiler]
+        Studio[Plotly Visualization Studio]
+        Copilot[Session-Isolated Natural Language Agent]
+    end
+
+    %% State Layer
+    subgraph Storage [Data & Session State Layer]
+        Registry[Master Dataset Registry Index]
+        DB[(SQLite Persistent Core: WAL Mode)]
+        Session[Browser Persistent User Storage]
+    end
+
+    %% Data Transmissions
+    Nice --> UI
+    Nice --> ETL
+    Nice --> Profile
+    Nice --> Studio
+    Nice --> Copilot
+
+    ETL --> Registry --> DB
+    Copilot --> Session
+    Copilot --> DB
+```
+
+### Operational Lifecycle
+1. **Dynamic ETL Loop:** Uploaded raw bytes streams enter a regex-based string sanitizer, mapping multi-format variables directly into dynamically realized SQLite database columns.
+2. **Contextual Analysis Loop:** Natural language strings are evaluated against active session dictionaries stored inside individual browser client contexts, isolating concurrent requests across unique users.
 
 ---
 
-## 🛠️ Technology Stack (Phase 1)
-* **Frontend:** Streamlit, Custom CSS
-* **Data Processing & Analytics:** Pandas, Plotly Express
-* **Information Retrieval (NLP):** spaCy (`en_core_web_sm`), Regex
-* **Database & Security:** SQLite3, Hashlib, Secrets
+## 🏁 Phase 1: Minor Project Milestone (Core Infrastructure)
+*Focus: Data engineering foundations, cross-compatible ingestion mechanics, and programmatic visualization grids.*
+
+### 🌟 Implemented Engineering Modules:
+- **Universal Data Ingestion Engine:** Integrated native loading maps for structural formats including `.csv`, `.xlsx`, and `.json`.
+- **Plotly Visualization Studio:** Built a dynamic rendering panel supporting interactive structural charts (`Bar`, `Scatter`, `Line`, `Area`) synchronized with user dark-mode interface parameters.
+- **Cryptographic Security Vault:** Implemented multi-user application logins utilizing **SHA-256 password hashing loops** enforced with cryptographically generated unique text salts via `secrets`.
+- **Administrative Table Catalog:** Implemented an index mapping table (`dataset_registry`) to actively monitor file footprints, execution stamps, row profiles, and user ownership keys.
 
 ---
 
-## 🚀 Phase 2: Capstone Upgrade — *PLANNED*
-The next evolution involves transitioning from a monolithic prototype to a highly scalable microservices architecture.
+## 🚀 Phase 2: Capstone Project Upgrade (Intelligent Systems & Isolation)
+*Focus: Custom token-stream parsers, multi-turn stateful conversational math, and session memory fencing.*
 
-* **Architecture Overhaul:** Decoupling the system by migrating the backend to **FastAPI** and replacing Streamlit with a Custom JS/HTML frontend.
-* **Database Migration:** Upgrading from SQLite to **MySQL** for enterprise-level concurrency and relational integrity.
-* **Machine Learning:** Deploying Supervised (Random Forest) or Unsupervised (Isolation Forest) algorithms on the heuristically labeled dataset to detect spending anomalies autonomously.
-
----
-
-## 🌿 Git Branching Strategy
-This repository strictly follows branch-based version control to separate academic evaluation phases:
-* **`main` branch (Stable):** Contains the fully tested, deployable Phase 1 (Minor Project) codebase.
-* **`capstone-upgrade` branch (Development):** The active workspace for Phase 2 architectural migrations and ML deployments.
+### 🔥 Advanced Structural Upgrades:
+- **Custom Robust ARFF Stream Parser:** Replaced generic text-loading modules with a custom streaming tokenizer. It separates heavy metadata attributes (`@attribute`) from raw payload instances (`@data`) using text block splitting to safely read large machine-learning benchmark streams (e.g., Weka datasets) while catching missing values (`?`, `NA`) gracefully.
+- **Session-Isolated AI Copilot Engine:** Refactored the core conversational memory architecture away from static global scripts down to **isolated browser cookie state partitions (`app.storage.user`)**. This ensures strict multi-user thread safety and prevents cross-user context bleeding.
+- **Multi-Turn Context Tracking & Fuzzy Matching:** Configured an evaluation threshold string loop (`difflib.get_close_matches` with `cutoff=0.4`) that resolves user typos and shorthand inputs. The system tracks column selection memory over multiple chat turns, allowing sequential commands (e.g., *"Look at withdrawals"* followed by *"What is the total sum?"* or *"Give me the average value"*) to evaluate correctly without resetting targets.
+- **Cascading Registry Purges:** Embedded instantaneous database drop commands (`DROP TABLE IF EXISTS`) linked directly with master tracking registers to guarantee clean storage maintenance and compliance.
 
 ---
 
-## ⚙️ Local Setup & Installation
+## 🌿 Branching Strategy
 
-1. **Clone the Repository:**
-   ```bash
-   git clone [https://github.com/K-ShivamZad/FinSecureAI.git](https://github.com/K-ShivamZad/FinSecureAI.git)
-   cd FinSecureAI
+This repository segregates evaluation phases through strict, branch-based code isolation:
+- **`main` Branch (Stable Production):** Houses the complete, refactored Phase 2 architecture incorporating NiceGUI async views, the custom ARFF parser, and session-bound conversation matrices.
+- **`capstone-upgrade` / Legacy Branches:** Storage spaces reserved for historic experimental iterations.
+
+---
+
+## ⚙️ Local Setup & Execution
+
+### 1. Install System Dependencies
+Ensure your target virtual development sandbox contains the fully updated platform requirements:
+```bash
+pip install nicegui pandas plotly openpyxl
+```
+
+### 2. Boot the Intelligent Engine
+Initialize your local web server by running the primary entry script:
+```bash
+python main_2_Z8kMc-.py
+```
+Open your browser and navigate to the security entry portal: **`http://localhost:8080/login`**
