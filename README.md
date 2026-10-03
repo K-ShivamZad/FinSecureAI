@@ -91,6 +91,6 @@ pip install nicegui pandas plotly openpyxl
 ### 2. Boot the Intelligent Engine
 Initialize your local web server by running the primary entry script:
 ```bash
-python main_2_Z8kMc-.py
+python main_2.py
 ```
 Open your browser and navigate to the security entry portal: **`http://localhost:8080/login`**
